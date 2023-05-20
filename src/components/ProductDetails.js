@@ -15,15 +15,13 @@ const ProductDetails = () => {
         history.push("/");
     }
 
-    const product = useSelector(state => state.products.products.filter(products => products.id == params.id)[0]);
+    const product = useSelector(state => state.products.products.filter(products => products.id === params.id)[0]);
 
     return (
         <ProductContainer>
             <div>
-                <div>
                  <h1>{product.title}</h1>
                  <h2>{`${product.price}$`}</h2>
-                </div>
                 <div>
                 <button type="button" onClick={() => history.push(`/product/edit/${params.id}`)}>Edit</button>
                 <button type="button" onClick={deleteHandler}>Delete</button>
@@ -31,7 +29,7 @@ const ProductDetails = () => {
             </div>
             <div>
                 {product.images.map((image, id)=>(
-                <img key={id} src={image}/>
+                <img key={id} src={image} alt="slika"/>
                 ))}
             </div>
             <div>

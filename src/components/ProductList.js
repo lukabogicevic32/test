@@ -1,19 +1,33 @@
-import { Link } from "react-router-dom";
+import {useParams} from "react-router-dom";
+import {useSelector} from "react-redux";
+import Button from "./UI/Button";
+import NavBar from './UI/NavBar';
 
-const ProductList = (props) => {
-  return (
-    <div>
-      <ul >
-        <li>
-          <h1>Products:</h1>
-        </li>
-        <li>
-          <Link to="/product/add"><button>Add Item</button></Link>
-        </li>
-        {props.children}
-      </ul>
-    </div>
-  );
-};
+const ProductSingle = (props) => {
+    let params = useParams();
+    const id = params.id
+    const product = useSelector(state => state.products.products.filter(products => products.id === parseInt(id))[0]);
 
-export default ProductList;
+    return (
+        <>
+            <NavBar id={id}/>
+            <Button route={'/'}/>
+            <main>
+                <section>
+                    <div>
+                        <div>
+                            <div>
+                        </div>
+                        <div>
+                            </div>
+                            <p>{product.title}</p>
+                            <p>$ {product.price}</p>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </>
+    );
+}
+
+export default ProductSingle;

@@ -1,30 +1,30 @@
-import { Link } from "react-router-dom";
-import { useHistory } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { deleteProduct } from "../store/store";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import Card from "./UI/Card";
+import NavBar from "./UI/NavBar";
 
-const ProductItem = props => {
-    const product = props.item;
-    const dispatch = useDispatch();
-    const history = useHistory();
-
-    const deleteHandler = () => {
-
-        dispatch(deleteProduct(product.id));
-        history.push("/");
-    }
+const ProductItem = (props) => {
+    const prod = props.item;
+    let history = useHistory();
 
     return (
-        <li>
+        <div>
+        <NavBar/>
+        <Card>
             <div>
-                <Link to={`/product/${product.id}`}>{product.title}</Link>
-                <div>{product.description}</div>
+                <div>
+                    <p>{prod.title}</p>
+                    <p>${prod.price}</p>
+                </div>
+                <div>
+                    <div>
+                        <button onClick={() => {history.push(`/product/${prod.id}`)}}>View Details</button>
+                        <button onClick={() => {history.push(`/product/edit/${prod.id}`)}}>Edit</button>
+                        <button onClick={() => {props.delete(prod.id)}}>Delete</button>
+                    </div>
+                </div>
             </div>
-            <div>
-                <button type="button" onClick={() => history.push(`/product/edit/${product.id}`)}>Edit</button>
-                <button type="button" onClick={deleteHandler}>Delete</button> 
-            </div>
-        </li>
+        </Card>
+        </div>
     );
 }
 

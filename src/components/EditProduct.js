@@ -1,65 +1,113 @@
-import ProductContainer from "./ProductContainer";
-import { useSelector, useDispatch } from "react-redux";
-import { useParams } from "react-router-dom";
-import { useHistory } from "react-router-dom";
-import { useState } from "react";
+import {useHistory, useParams} from "react-router-dom";
+import {useDispatch, useSelector} from "react-redux";
+import Button from "./UI/Button";
+import NavBar from './UI/NavBar';
+import { useState,useEffect} from "react";
 import { updateProduct } from "../store/store";
 
 const EditProduct = () => {
-    const history = useHistory();
+    let params = useParams();
+    const id = params.id;
+    let history = useHistory();
     const dispatch = useDispatch();
-    const params = useParams();
-    const product = useSelector(state => state.products.products.filter(products => products.id == params.id)[0]);
-  
-    const [enteredTitle, setEnteredTitle] = useState();
-    const [enteredPrice, setEnteredPrice] = useState();
-    const [enteredDescription, setEnteredDescription] = useState();
+    const product = useSelector(state => state.products.products.filter(products => products.id === parseInt(id))[0]);
+    const [categories, setCategories] = useState([]);
+    const [editProd, setEditProd] = useState(product);
 
-    const titleChangeHandler = event => setEnteredTitle(event.target.value);
-    const priceChangeHandler = event => setEnteredPrice(event.target.value);
-    const descriptionChangeHandler = event => setEnteredDescription(event.target.value);
-
-    if (enteredTitle == undefined) setEnteredTitle(product.title);
-    if (enteredPrice == undefined) setEnteredPrice(product.price);
-    if (enteredDescription == undefined) setEnteredDescription(product.description);
-
-    const submitHandler = event => {
-        event.preventDefault();
-        dispatch(updateProduct());
-        history.push("/");  
+    const getApiData = async () => {
+        const response = await fetch('https://dummyjson.com/products/categories')
+            .then(res => res.json())
+        setCategories(response);
     };
 
+    useEffect(() => {
+        getApiData()
+    }, []);
+   
+    const formChangeHandler = event => {
+        const name = event.target.name;
+        const value = event.target.value;
+        setEditProd((prevState) => {
+            return {...prevState, [name]: value}
+        })
+    }
+
+    const formSubmitHandler = event => {
+        event.preventDefault();
+
+        fetch(`https://dummyjson.com/product/edit/${id}`, {
+            method: 'PUT', /* or PATCH */
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ...editProd
+            })
+        })
+            .then(res => res.json())
+
+        dispatch(updateProduct(editProd));
+
+        history.push(`/product/edit/${id}`);
+    }
+
     return (
-        <ProductContainer>
-            <h1>{`Edit Product / ${product.title}`}</h1>
-            <form  onSubmit={submitHandler}>
-                <div>
-                <div>
+        <>
+            <NavBar id={id} edit={true}/>
+            <Button route={'/'}/>
+            <main>
+                <section>
+                    <hr/>
                     <div>
-                        <div>
-                       <label>Title:</label>
-                         <input type='text' value={product.title} onChange={titleChangeHandler}/>
-                        </div>
-                          <div>
-                        <label>Price:</label>
-                        <input type='text' value={product.price} onChange={priceChangeHandler}/>
-                         </div>
-                        </div>
-                        <div>
-                        <div>
-                         <label>Description:</label>
-                        <textarea type='text' value={product.description} onChange={descriptionChangeHandler}/>
-                         </div>
-                        </div>
+                        <form onSubmit={formSubmitHandler}>
+                            <div>
+                                <label htmlFor="title">Title</label>
+                                <input onChange={formChangeHandler} type="text"
+                                       name={'title'} value={editProd.title}/>
+                            </div>
+
+                            <div className={'form-group mb-3 col-12'}>
+                                <label htmlFor="exampleDataList" className="form-label">Categories</label>
+                                <input onChange={formChangeHandler} className="form-control" list="datalistOptions"
+                                       name={'category'}
+                                       placeholder={editProd.category}/>
+                                <datalist id="datalistOptions">
+                                    {categories.map((cat, id) => {
+                                        return <option key={id} value={cat}/>
+                                    })}
+                                </datalist>
+                            </div>
+
+
+                            <div>
+                                <label htmlFor="price">Price</label>
+                                <div>
+                                    <span>$</span>
+                                    <input onChange={formChangeHandler} min={0} type="number"
+                                           name={'price'}
+                                           value={editProd.price}/>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label htmlFor="description">Description</label>
+                                <textarea name="description" onChange={(event) => {
+                                    formChangeHandler(event);
+                                }} value={editProd.description} id="bio" rows="10">
+
+                                </textarea>
+                            </div>
+
+                            <div>
+                                <div>
+                                    <button type={"submit"}>Save changes</button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                    <div>
-                        <button type='button'  onClick={() => history.push('/')} >Cancel</button>
-                        <button type='submit'>Save</button>
-                    </div>
-                </div>
-            </form>
-        </ProductContainer>
+                </section>
+            </main>
+        </>
     );
+
 }
 
 export default EditProduct;
